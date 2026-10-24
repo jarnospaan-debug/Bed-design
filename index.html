@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bed voor Roan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><span class="brand-mark" aria-hidden="true"></span><div><div class="brand-name">Bed voor Roan</div><div class="brand-sub" id="sumSize">90 × 200 cm</div></div></div>
+    <nav class="tabs" role="tablist">
+      <a href="#ruimte" role="tab" data-tab="ruimte">Ruimte</a>
+      <a href="#ontwerp" role="tab" data-tab="ontwerp">Ontwerp</a>
+      <a href="#kosten" role="tab" data-tab="kosten">Kosten</a>
+      <a href="#handleiding" role="tab" data-tab="handleiding">Handleiding</a>
+      <a href="#mandje" role="tab" data-tab="mandje">Winkelmandje <span class="badge" id="cartBadge">0</span></a>
+    </nav>
+    <div class="sum"><span class="sum-label">Kostprijs</span><span class="sum-val" id="sumTotal">€ 0</span><span class="pill" id="sumFit">past</span></div>
+  </div>
+</header>
+
+<main>
+  <!-- Ruimte + Ontwerp delen de 3D-weergave -->
+  <div class="work" id="work">
+    <aside class="side">
+      <div data-pane="ruimte">
+        <p class="note">Startmaten zijn geschat uit je foto’s. Meet ze na en vul ze hieronder in, of laad een 3D-scan.</p>
+
+        <fieldset><legend>Kamer</legend>
+          <div class="row3">
+            <label>Breedte achterwand<input type="number" id="roomW" step="1"><span class="u">cm</span></label>
+            <label>Lengte zijwand<input type="number" id="roomL" step="1"><span class="u">cm</span></label>
+            <label>Hoogte<input type="number" id="roomH" step="1"><span class="u">cm</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset><legend>Deur</legend>
+          <label>Wand<select id="doorWall"></select></label>
+          <div class="row3" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+            <label>Vanaf hoek<input type="number" id="doorOff"><span class="u">cm</span></label>
+            <label>Breedte<input type="number" id="doorW"><span class="u">cm</span></label>
+          </div>
+          <p class="hint">Scharnier aan de kant van de hoek, deur draait de kamer in.</p>
+        </fieldset>
+
+        <fieldset><legend>Ramen</legend><div id="windows" class="stack"></div></fieldset>
+
+        <fieldset><legend>Bestaande meubels</legend>
+          <p class="hint">x = vanaf linkerwand, z = vanaf achterwand. Blauw op de vloer = ruimte die vrij moet blijven.</p>
+          <div id="furniture" class="stack"></div>
+        </fieldset>
+
+        <fieldset><legend>3D-scan</legend>
+          <label class="file"><input type="file" id="scanFile" accept=".glb,.gltf,.obj"><span>Scan laden (.glb, .obj)</span></label>
+          <div id="scanControls" hidden>
+            <div class="row3">
+              <label>Eenheid<select id="scanUnit"><option value="1000">meter</option><option value="10">centimeter</option><option value="1">millimeter</option></select></label>
+              <label>Draaien<input type="number" id="scanRot" value="0" step="5"><span class="u">°</span></label>
+              <label>&nbsp;<button type="button" id="scanClear" class="btn ghost">Verwijder</button></label>
+            </div>
+            <div class="row3">
+              <label>Verschuif x<input type="number" id="scanX" value="0"><span class="u">cm</span></label>
+              <label>Verschuif z<input type="number" id="scanZ" value="0"><span class="u">cm</span></label>
+              <label>&nbsp;<button type="button" id="scanApply" class="btn ghost">Maten overnemen</button></label>
+            </div>
+            <p class="hint" id="scanInfo"></p>
+          </div>
+          <div class="checks-row">
+            <label class="chk"><input type="checkbox" id="showWalls" checked> Muren tonen</label>
+            <label class="chk"><input type="checkbox" id="showFurn" checked> Meubels tonen</label>
+          </div>
+          <details><summary>Zo maak je een scan</summary>
+            <ol class="howto">
+              <li>iPhone/iPad Pro met LiDAR: app <b>3d Scanner App</b> of <b>Polycam</b>, modus “Room”/“LiDAR”.</li>
+              <li>Andere telefoon: <b>Polycam</b> in fotomodus, of meet met een rolmaat.</li>
+              <li>Loop langzaam rond en houd de telefoon op borsthoogte. Neem ook vloer en plafond mee.</li>
+              <li>Exporteer als <b>GLB</b> (of OBJ) en laad het bestand hierboven.</li>
+              <li>Draai de scan tot de muren recht staan en klik op “Maten overnemen”.</li>
+            </ol>
+          </details>
+        </fieldset>
+
+        <fieldset><legend>Meten</legend>
+          <button type="button" class="btn" id="measureBtn" aria-pressed="false">Meetlint aan</button>
+          <p class="hint" id="measureOut">Klik twee punten in de 3D-weergave.</p>
+        </fieldset>
+      </div>
+
+      <div data-pane="ontwerp">
+        <fieldset><legend>Matras</legend>
+          <div class="seg" id="sizeSeg"></div>
+          <p class="hint">90 × 200 past het beste in deze kamer. Vanaf 120 cm komt er een middenbalk met 2 poten bij.</p>
+        </fieldset>
+        <fieldset><legend>Vorm</legend>
+          <label class="slider">Bovenkant bedrand <output id="railOut"></output><input type="range" id="railTop" min="300" max="500" step="2"></label>
+          <label class="chk"><input type="checkbox" id="headboard"> Hoofdbord</label>
+          <label class="slider" id="headWrap">Hoogte hoofdbord <output id="headOut"></output><input type="range" id="headH" min="650" max="1100" step="10"></label>
+        </fieldset>
+        <fieldset><legend>Bodem en afwerking</legend>
+          <div class="seg" id="slatSeg"><button type="button" data-v="zelf">Latten zelf zagen</button><button type="button" data-v="rolbodem">Rolbodem kopen</button></div>
+          <div class="seg" id="finishSeg"><button type="button" data-v="olie">Naturel olie</button><button type="button" data-v="wit">Wit</button><button type="button" data-v="zwart">Zwart</button></div>
+        </fieldset>
+        <fieldset><legend>Plaats in de kamer</legend>
+          <div class="row3">
+            <label>x<input type="number" id="bedX"><span class="u">cm</span></label>
+            <label>z<input type="number" id="bedZ"><span class="u">cm</span></label>
+            <label>Hoofdeinde<select id="bedRot"><option value="0">achterwand</option><option value="90">linkerwand</option><option value="180">voorwand</option><option value="270">rechterwand</option></select></label>
+          </div>
+          <label class="chk"><input type="checkbox" id="showMattress" checked> Matras tonen</label>
+        </fieldset>
+        <fieldset><legend>Controle</legend><ul class="checks" id="checks"></ul></fieldset>
+        <dl class="facts" id="facts"></dl>
+      </div>
+    </aside>
+    <section class="stage">
+      <div id="viewer" class="viewer"></div>
+      <div class="stage-tools">
+        <button type="button" class="btn ghost sm" data-view="room">Kamer</button>
+        <button type="button" class="btn ghost sm" data-view="top">Boven</button>
+        <button type="button" class="btn ghost sm" data-view="bed">Bed</button>
+      </div>
+      <div class="stage-err" id="glErr" hidden>3D kan niet worden geladen in deze browser.</div>
+    </section>
+  </div>
+
+  <section class="doc" data-doc="kosten" hidden>
+    <div class="doc-in">
+      <h1>Kostprijs</h1>
+      <p class="lede">Gebaseerd op het huidige ontwerp. Prijzen zijn indicatief (bouwmarkt, najaar 2026) en niet live gecontroleerd. Pas ze aan in het winkelmandje als je de echte prijs weet.</p>
+      <div class="tiles" id="costTiles"></div>
+      <h2>Materiaallijst</h2>
+      <div class="tablewrap"><table class="tbl" id="costTable"></table></div>
+      <h2>Zaaglijst</h2>
+      <p class="lede">Per handelslengte: welke delen je eruit zaagt. Gearceerd = restant. Zaagsnede 4 mm. Laat de bouwmarkt zagen als je geen goede zaag hebt, dan passen de planken ook in de auto.</p>
+      <div id="cutlist" class="cutlist"></div>
+      <h2>Onderdelen</h2>
+      <div class="tablewrap"><table class="tbl" id="partTable"></table></div>
+    </div>
+  </section>
+
+  <section class="doc" data-doc="handleiding" hidden>
+    <div class="doc-in wide">
+      <h1>Montagehandleiding</h1>
+      <p class="lede">Gegenereerd uit het ontwerp, dus hij past zich aan als je maten wijzigt. Afdrukken: open <code>index.html</code> uit de repository in je browser en kies Afdrukken (A4, staand).</p>
+      <div id="manual" class="manual"></div>
+    </div>
+  </section>
+
+  <section class="doc" data-doc="mandje" hidden>
+    <div class="doc-in">
+      <h1>Winkelmandje</h1>
+      <p class="lede">Alles wat je nodig hebt, klaar om te kopen. Een webshop-mandje vullen kan ik niet vanaf hier, dus elke regel heeft een zoeklink naar de winkel. Vink af wat je hebt gekocht.</p>
+      <div class="cart-bar">
+        <label>Winkel <select id="store"></select></label>
+        <button type="button" class="btn" id="copyList">Kopieer boodschappenlijst</button>
+        <button type="button" class="btn ghost" id="resetCart">Prijzen terugzetten</button>
+        <span class="hint" id="copyMsg" role="status"></span>
+      </div>
+      <div class="tablewrap"><table class="tbl cart" id="cartTable"></table></div>
+      <textarea id="copyFallback" class="copyfb" readonly hidden></textarea>
+    </div>
+  </section>
+</main>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
